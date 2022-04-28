@@ -2,6 +2,7 @@ import http from "http";
 import express from "express";
 import cors from "cors";
 import { Server } from 'socket.io';
+import { v4 as uuid } from 'uuid';
 
 const port = process.env.PORT || 8000;
 
@@ -25,14 +26,38 @@ const io = new Server(server, {
   }
 });
 
+let players = {}
+
 io.on('connection', (socket) => {
   console.log('a user connected');
+
+  // Game events
+  
+  socket.on('player_joined', (name) => {
+    const playerId = uuid();
+    players[playerId] = {
+      name,
+      points: 0,
+    };
+
+    socket.emit('player_added', playerId);
+  });
 
   socket.on('ready', () => {
     console.log('ready')
     io.emit('start');
   });
 
+  socket.on('player_answer', ({ id, point = 0 }) => {
+    players[id].points = players[id].points + point;
+    console.log(players);
+  });
+
+  socket.on('restart', () => {
+    players = {};
+  });
+
+  // User disconnected
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
