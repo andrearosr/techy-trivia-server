@@ -18,7 +18,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      'http://192.168.1.5:3000',
+      'http://172.21.0.63:3000',
       'http://127.0.0.1:3000',
       'http://localhost:3000',
       'https://techy-trivia.herokuapp.com',
@@ -53,8 +53,20 @@ io.on('connection', (socket) => {
     console.log(players);
   });
 
+  socket.on('end', () => {
+    const leaderboard = Object.values(players).sort((a, b) => b.points - a.points);
+    socket.emit('game_ended', leaderboard);
+  });
+
   socket.on('restart', () => {
-    players = {};
+    for (const [id, player] in Object.entries(players)) {
+      players[id] = {
+        ...player,
+        points: 0,
+      };
+    }
+
+    io.emit('start_over');
   });
 
   // User disconnected
