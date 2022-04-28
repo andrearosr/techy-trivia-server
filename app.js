@@ -1,15 +1,31 @@
 import http from "http";
-import express from "express";
+import websocket from "websocket";
 
-const hostname = '127.0.0.1';
-const port = 5000;
+const port = 8000;
+const WebSocketServer = websocket.server;
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World');
+// Spinning the http server and the websocket server.
+const server = http.createServer();
+server.listen(port);
+
+const wsServer = new WebSocketServer({
+  httpServer: server,
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+const clients = {};
+
+// This code generates unique userid for everyuser.
+const getUniqueID = () => {
+  const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  return s4() + s4() + '-' + s4();
+};
+
+wsServer.on('request', function (request) {
+  var userID = getUniqueID();
+  console.log(`Recieved a new connection from origin ${request.origin}`);
+
+  const connection = request.accept(null, request.origin);
+  clients[userID] = connection;
+
+  console.log(`connected: ${userID}`);
 });
