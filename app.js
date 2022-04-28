@@ -9,6 +9,10 @@ const port = 8000;
 const app = express();
 app.use(cors());
 
+app.get('/', (req, res) => {
+  res.send('<h1>Techy Server</h1>');
+});
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
