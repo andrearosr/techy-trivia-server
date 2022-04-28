@@ -12,7 +12,12 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: [
+      'http://192.168.1.5:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3000',
+      'https://techy-trivia.herokuapp.com',
+    ],
   }
 });
 
