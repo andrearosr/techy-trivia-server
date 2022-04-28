@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import { Server } from 'socket.io';
 
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 // Spinning the http server and the websocket server.
 const app = express();
