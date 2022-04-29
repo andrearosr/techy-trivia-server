@@ -30,15 +30,15 @@ const io = new Server(server, {
 let players = {}
 let playing = false;
 
-// (async () => {
-//   const sockets = await io.fetchSockets();
-// })();
+(async () => {
+  const sockets = await io.fetchSockets();
+  console.log(`disconnecting ${Object.keys(sockets).length} instances`);
+  io.disconnectSockets();
+})();
 
 
 io.on('connection', async (socket) => {
   console.log('a user connected');
-  const sockets = await io.fetchSockets();
-  console.log(Object.keys(sockets).length)
 
   // Game events
   
