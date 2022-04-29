@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { Server } from 'socket.io';
 import { v4 as uuid } from 'uuid';
+import e from 'cors';
 
 const port = process.env.PORT || 8000;
 
@@ -27,6 +28,7 @@ const io = new Server(server, {
 });
 
 let players = {}
+let playing = false;
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -34,27 +36,37 @@ io.on('connection', (socket) => {
   // Game events
   
   socket.on('player_joined', (name) => {
-    const playerId = uuid();
-    players[playerId] = {
-      name,
-      points: 0,
-    };
-
-    socket.emit('player_added', playerId);
+    if (playing) {
+      socket.emit('player_rejected');
+    } else {
+      const playerId = uuid();
+      players[playerId] = {
+        name,
+        points: 0,
+      };
+      socket.emit('player_added', {
+        id: playerId,
+        name,
+      });
+    }
   });
 
   socket.on('ready', () => {
-    console.log('ready')
+    console.log('ready');
+    playing = true;
     io.emit('start');
   });
 
   socket.on('player_answer', ({ id, point = 0 }) => {
-    players[id].points = players[id].points + point;
-    console.log(players);
+    console.log('player answered', id, point);
+    if (players[id]) {
+      players[id].points = players[id].points + point;
+    }
   });
 
   socket.on('end', () => {
     const leaderboard = Object.values(players).sort((a, b) => b.points - a.points);
+    playing = false;
     socket.emit('game_ended', leaderboard);
   });
 
