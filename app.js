@@ -30,6 +30,12 @@ const io = new Server(server, {
 let players = {}
 let playing = false;
 
+console.log(io.sockets.sockets)
+Object.keys(io.sockets.sockets).forEach(function (s) {
+  io.sockets.sockets[s].disconnect(true);
+});
+
+
 io.on('connection', (socket) => {
   console.log('a user connected');
 
